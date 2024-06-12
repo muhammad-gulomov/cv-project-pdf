@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional CV Creator</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f2f5;
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+
+        .container {
+            margin-top: 20px;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #4267B2;
+        }
+
+        .form-section {
+            margin-bottom: 20px;
+        }
+
+        .form-control {
+            border-color: #ccc;
+        }
+
+        .btn-primary {
+            background-color: #4267B2;
+            border-color: #4267B2;
+        }
+
+        .btn-primary:hover {
+            background-color: #3b5998;
+            border-color: #3b5998;
+        }
+
+        .btn-info {
+            background-color: #4267B2;
+            border-color: #4267B2;
+        }
+
+        .btn-info:hover {
+            background-color: #3b5998;
+            border-color: #3b5998;
+        }
+
+        .btn-upload {
+            margin-top: 5px;
+        }
+
+        #profilePreview {
+            max-width: 150px;
+            max-height: 150px;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .footer a {
+            color: #4267B2;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="text-center mb-4">Professional CV Creator</h1>
+
+    <!-- Upload Skills Section -->
+    <form action="/upload/skills" method="post" enctype="multipart/form-data">
+        <div class="form-group form-section">
+            <label for="skillsFile">Upload Skills</label>
+            <input type="file" class="form-control-file" id="skillsFile" name="skills">
+            <button type="submit" class="btn btn-info btn-upload">Upload Skills</button>
+        </div>
+    </form>
+
+    <!-- Upload Profile Image Section -->
+    <form action="/save/photo" method="post" enctype="multipart/form-data">
+        <div class="form-group form-section">
+            <label for="profileImage">Upload Profile Image</label>
+            <input type="file" class="form-control-file" id="profileImage" name="file">
+            <button type="submit" class="btn btn-info btn-upload">Upload</button>
+        </div>
+    </form>
+    <div class="form-group form-section">
+        <img id="profilePreview" th:src="@{'/user/photo'}" alt="Your Profile Photo Will Appear Here">
+    </div>
+
+    <!-- Basic Information Form -->
+    <form action="/user/basic/info" method="post">
+        <h2>Basic Information</h2>
+        <div class="form-group form-section">
+            <label for="firstName">First Name</label>
+            <input name="firstName" type="text" class="form-control" id="firstName"
+                   th:value="${cv != null ? cv.firstName : ''}" required>
+        </div>
+        <div class="form-group form-section">
+            <label for="lastName">Last Name</label>
+            <input name="lastName" type="text" class="form-control" id="lastName"
+                   th:value="${cv != null ? cv.lastName : ''}" required>
+        </div>
+        <div class="form-group form-section">
+            <label for="fathersName">Father's Name</label>
+            <input name="fathersName" type="text" class="form-control" id="fathersName"
+                   th:value="${cv!= null ? cv.fathersName : ''}" required>
+        </div>
+        <div class="form-group form-section">
+            <label for="age">Age</label>
+            <input name="age" type="number" class="form-control" id="age" th:value="${cv != null ? cv.age : ''}"
+                   required>
+        </div>
+        <div class="form-group form-section">
+            <label for="email">Email</label>
+            <input name="email" type="email" class="form-control" id="email"
+                   th:value="${cv != null ? cv.email : ''}" required>
+        </div>
+        <div class="form-group form-section">
+            <label for="phone">Phone</label>
+            <input name="phone" type="tel" class="form-control" id="phone"
+                   th:value="${cv != null ? cv.phone : ''}" required>
+        </div>
+
+        <!-- Skills -->
+        <div class="form-group form-section">
+            <label for="skills">Skills</label>
+            <ul id="skillsList" class="skills-list"></ul>
+            <select name="skillsId" id="skills" class="form-control" multiple>
+                <option th:each="skill : ${skills}" th:value="${skill.id}"
+                        th:text="${skill.name}"
+                        th:selected="${cv != null} ? ${#lists.contains(cv.skills, skill)} : false">
+                </option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Basic Information</button>
+    </form>
+
+    <!-- Education Form -->
+    <form action="/add/education" method="post">
+        <h2>Education</h2>
+        <ul id="educationList" class="education-list" th:if="${educations != null}">
+            <li th:each="education : ${educations}">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span th:text="${education.placeOfStudy}"></span>
+                    <a th:href="@{'/remove/education/' + ${education.id}}" class="text-danger" title="Remove Education">&#10006;</a>
+                </div>
+                <div class="text-muted">
+                    <span>Start Date: </span>
+                    <span th:text="${education.startedAt}"></span>
+                    <span> - Finish Date: </span>
+                    <span th:text="${education.finishedAt}"></span>
+                </div>
+            </li>
+        </ul>
+        <div class="form-group">
+            <input name="studyPlace" type="text" class="form-control mb-2" id="studyPlace"
+                   placeholder="Study Place">
+            <input name="startDateEducation" type="date" class="form-control mb-2" id="startDateEducation">
+            <input name="finishedDateEducation" type="date" class="form-control mb-2" id="finishedDateEducation">
+            <button type="submit" class="btn btn-primary" id="addEducation">Add Education</button>
+        </div>
+    </form>
+
+    <!-- Experience Form -->
+    <form action="/add/experience" method="post">
+        <h2>Experience</h2>
+        <ul id="experienceList" class="experience-list" th:if="${experiences != null}">
+            <li th:each="experience : ${experiences}">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>
+                        <strong th:text="${experience.companyName}"></strong>
+                        <span class="text-muted" th:text="'(' + ${experience.startedAt} + ' - ' + ${experience.finishedAt} + ')'"></span>
+                    </span>
+                    <a th:href="@{'/remove/experience/' + ${experience.id}}" class="text-danger" title="Remove Experience">&#10006;</a>
+                </div>
+            </li>
+        </ul>
+        <div class="form-group">
+            <input name="companyName" type="text" class="form-control mb-2" id="experiencePlace"
+                   placeholder="Experience Place">
+            <input name="startDateExperience" type="date" class="form-control mb-2" id="expStartDate">
+            <input name="finishedDateExperience" type="date" class="form-control mb-2" id="expEndDate">
+            <button type="submit" class="btn btn-primary" id="addExperience">Add Experience</button>
+        </div>
+    </form>
+
+    <!-- Generate CV Form -->
+    <form action="/generate/cv" method="post">
+        <button type="submit" class="btn btn-success">Generate CV</button>
+    </form>
+</div>
+
+<div class="footer">
+    <a href="https://www.linkedin.com/in/muhammadtrying/">Muhammad's Production</a>
+</div>
+
